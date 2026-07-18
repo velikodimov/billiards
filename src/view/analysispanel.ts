@@ -67,6 +67,7 @@ export class AnalysisPanel {
     this.buildPanel()
     this.buildCameraButton()
     this.buildDiagramButton()
+    this.buildDrillButton()
     this.container.view.camera.forceMode(this.container.view.camera.topView)
 
     // Take over the Hit button / canvas-dblclick entirely: a normal "SpaceUp"
@@ -403,6 +404,39 @@ export class AnalysisPanel {
         tableSize
       )
       window.open(url, "_blank")
+    })
+    document.getElementById("viewP1")?.appendChild(btn)
+  }
+
+  /** Jump to drill mode in the same tab, carrying the current shot (live aim,
+   * including any parameter tweaks made here). If a shot has been fired and not
+   * yet restored, use the pre-shot state captured at Hit time — the drill must
+   * start from the shot's initial conditions, not mid-playback positions.
+   * Browser Back returns to the analysis. */
+  private buildDrillButton() {
+    const btn = document.createElement("button")
+    btn.id = "analysisDrill"
+    btn.className = "analysis-drill-btn"
+    btn.title = "open in drill mode"
+    btn.setAttribute("aria-label", "Open in drill mode")
+    btn.textContent = "Drill"
+    btn.addEventListener("click", () => {
+      const shotFired = this.hitInFlight || this.awaitingRestore
+      const preShot =
+        shotFired && this.pendingRestoreState && this.pendingRestoreAim
+          ? {
+              init: JSON.stringify(this.pendingRestoreState),
+              shot: ExportUtils.encodeShot(this.pendingRestoreAim),
+            }
+          : ExportUtils.captureSnapshot(this.container.table)
+      const urlParams = new URLSearchParams(globalThis.location?.search ?? "")
+      const tableSize = parseFloat(urlParams.get("tableSize") || "10")
+      window.location.href = ExportUtils.getDrillUrl(
+        this.container.rules.rulename,
+        preShot.init,
+        preShot.shot,
+        tableSize
+      )
     })
     document.getElementById("viewP1")?.appendChild(btn)
   }

@@ -502,9 +502,10 @@ body.analysis-mode #commentMenu {
 }
 
 /* Floating buttons on the table pane: camera-toggle lower-right,
-   diagram-export upper-right. */
+   diagram-export and drill-mode jump upper-right. */
 .analysis-camera-btn,
-.analysis-diagram-btn {
+.analysis-diagram-btn,
+.analysis-drill-btn {
   position: absolute;
   right: 12px;
   width: 48px;
@@ -526,8 +527,15 @@ body.analysis-mode #commentMenu {
   top: 12px;
 }
 
+.analysis-drill-btn {
+  top: 68px;
+  height: 28px;
+  font-size: 13px;
+}
+
 .analysis-camera-btn:hover,
-.analysis-diagram-btn:hover {
+.analysis-diagram-btn:hover,
+.analysis-drill-btn:hover {
   background: rgb(0 60 110 / 85%);
 }
 
