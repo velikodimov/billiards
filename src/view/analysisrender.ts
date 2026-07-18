@@ -10,7 +10,6 @@
 import { offCenterLimit, R } from "../model/physics/constants"
 import {
   DEFAULT_SPIN_HALF_WINDOW,
-  OutcomeSignature,
   ParamKey,
   ParamRange,
   SPIN_GRID_STEP,
@@ -23,7 +22,6 @@ import {
   isThreeCushionScored,
   paramRangeOf,
   runSensitivityAnalysis,
-  signaturesMatch,
   simulateShot,
   verifySeed,
 } from "../sensitivity"
@@ -124,10 +122,6 @@ export interface AnalysisHandle {
 }
 
 export interface RunAnalysisOptions {
-  /** The shot's actual (main-thread) outcome. When given, the worker's seed
-   * simulation must match it or the scan is aborted with a parity warning.
-   * When omitted, the scan runs regardless of whether the seed scored. */
-  expectedSignature?: OutcomeSignature
   workerUrl?: string
   /** Called when the user clicks a display to pick a new parameter value. */
   onPick?: (pick: Pick) => void
@@ -150,7 +144,7 @@ interface PlotGeom {
 /**
  * Build the analysis UI inside `rootEl` and run the fixed analysis set for
  * `seed`. Returns a handle whose `stop()` aborts the scan. Works for scoring AND
- * missed seeds (see RunAnalysisOptions.expectedSignature).
+ * missed seeds.
  */
 export function runAnalysisInto(
   rootEl: HTMLElement,
@@ -802,8 +796,9 @@ export function runAnalysisInto(
     }
   }
 
-  /** On load: verify the seed reproduces in the worker, then run ONLY the spin
-   * 2-D scatter. The three 1-D bars stay empty until their Show button is used. */
+  /** On load: simulate the seed in the worker (recording its outcome for the
+   * CSV export), then run ONLY the spin 2-D scatter. The three 1-D bars stay
+   * empty until their Show button is used. */
   async function runInitial() {
     csvRows = [
       "analysis,role,scored,angle,power,offsetX,offsetY,elevation",
@@ -814,7 +809,7 @@ export function runAnalysisInto(
     busy = true
     refreshSpinButton()
 
-    statusEl.textContent = "Verifying seed reproduces in the worker…"
+    statusEl.textContent = "Simulating seed shot…"
     const seedSig = await verifySeed(
       seed.balls,
       seed.cueBallId,
@@ -827,22 +822,6 @@ export function runAnalysisInto(
       "pending",
       seedSig.scored ? "success" : "fail"
     )
-
-    // Parity guard: when the caller knows the shot's actual outcome, the worker
-    // must reproduce it (scored OR missed). A mismatch means the physics inputs
-    // diverge and the scan would be meaningless. With no expected outcome we just
-    // proceed — the scan is valid for failed shots too.
-    if (
-      opts.expectedSignature &&
-      !signaturesMatch(seedSig, opts.expectedSignature)
-    ) {
-      statusEl.innerHTML =
-        '<span class="error">The worker reproduces this shot differently from ' +
-        "the table — physics inputs don't match. Analysis aborted.</span>"
-      stopBtn.disabled = true
-      busy = false
-      return
-    }
 
     try {
       await populateSpin(seed.shot)

@@ -3,15 +3,12 @@ import { Container } from "../container/container"
 import { Aim } from "../controller/aim"
 import { DrillReplay } from "../controller/drillreplay"
 import { AimEvent } from "../events/aimevent"
-import { Ball } from "../model/ball"
 import { maxPower } from "../model/physics/constants"
 import { previewShot } from "../model/previewshot"
 import {
   BallPos,
   ShotParams,
-  SimOutcome,
   buildAxisSpecs,
-  outcomeSignature,
   paramRangeOf,
 } from "../sensitivity"
 import { AnalysisSeed } from "../seedlink"
@@ -211,8 +208,7 @@ export class AnalysisPanel {
       elevationMin: elevRange.scannedMin,
       elevationMax: elevRange.scannedMax,
     }
-    // Draw the trajectory on the table and capture the authoritative
-    // (main-thread) outcome so the worker's reproduction can be checked.
+    // Draw the trajectory on the table.
     const outcomes = previewShot(this.container.table, this.container.step)
     this.previewShown = !!outcomes
     this.aimSnapshot = this.snapshotAim()
@@ -221,12 +217,6 @@ export class AnalysisPanel {
       onPick: (pick) => this.onPick(pick),
       onShowElevation: () =>
         this.container.table.cue.aimInputs.showTiltControl(),
-    }
-    if (outcomes) {
-      opts.expectedSignature = outcomeSignature(
-        this.toSimOutcomes(outcomes),
-        seed.cueBallId
-      )
     }
     const host = document.getElementById("analysisContent")!
     this.handle = runAnalysisInto(host, seed, opts)
@@ -361,20 +351,6 @@ export class AnalysisPanel {
     const cushionModel =
       new URLSearchParams(location.search).get("cushionModel") ?? "mathavan"
     return { balls, cueBallId, shot, ruleType: "threecushion", cushionModel }
-  }
-
-  /** Main-thread Outcome[] → worker-shaped SimOutcome[], with balls keyed by
-   * their array index (matching captureSeed / the worker's id scheme). */
-  private toSimOutcomes(
-    outcomes: { type: string; ballA: Ball | null; ballB: Ball | null }[]
-  ): SimOutcome[] {
-    const balls = this.container.table.balls
-    return outcomes.map((o) => {
-      const sim: SimOutcome = { type: o.type }
-      if (o.ballA) sim.ballA = balls.indexOf(o.ballA)
-      if (o.ballB) sim.ballB = balls.indexOf(o.ballB)
-      return sim
-    })
   }
 
   private buildPanel() {
