@@ -66,10 +66,6 @@ export class AnalysisPanel {
   constructor(container: Container) {
     this.container = container
     document.body.classList.add("analysis-mode")
-    // Shot playback feels snappier at 1.5x in this view only — drill mode and
-    // normal play never touch timeScale, so they keep their default of 1.
-    this.container.timeScale = 1.5
-
     this.buildPanel()
     this.buildCameraButton()
     this.container.view.camera.forceMode(this.container.view.camera.topView)
