@@ -36,9 +36,9 @@ export class ExportUtils {
     shot: string,
     tableSize?: number
   ): string {
-    const base = isAnalysis
-      ? "https://velikodimov.github.io/billiards/dist/index.html"
-      : "diagrams/export.html"
+    // Both targets are same-origin: analysis is a query-flag mode of
+    // index.html, so the link works locally and deployed alike.
+    const base = isAnalysis ? "index.html" : "diagrams/export.html"
     const params = new URLSearchParams()
     params.set("ruletype", rulename)
     if (isAnalysis) {
