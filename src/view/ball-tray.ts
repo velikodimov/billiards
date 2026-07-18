@@ -17,6 +17,10 @@ export interface HighBreakEntry {
   hiScoreUri: string
 }
 
+/** In drill mode the tray survives the same-tab drill ⇄ analysis jumps via
+ * sessionStorage (per-tab: a new tab starts a fresh history). */
+const STORAGE_KEY = "drillBallTray"
+
 export class BallTray {
   container: Container
   entries: ShotEntry[] = []
@@ -25,6 +29,7 @@ export class BallTray {
   private readonly listElement: HTMLElement | null
   private readonly leftBtn: HTMLElement | null
   private readonly rightBtn: HTMLElement | null
+  private readonly persistEnabled: boolean
 
   constructor(container: Container) {
     this.container = container
@@ -32,6 +37,9 @@ export class BallTray {
     this.listElement = id("ballTrayList")
     this.leftBtn = id("trayLeft")
     this.rightBtn = id("trayRight")
+    this.persistEnabled = new URLSearchParams(
+      globalThis.location?.search ?? ""
+    ).has("drill")
 
     const stop = (e: Event) => {
       if ((e.target as HTMLElement).closest("a")) {
@@ -55,7 +63,32 @@ export class BallTray {
     this.trayElement?.addEventListener("mousedown", stop)
     this.trayElement?.addEventListener("touchstart", stop)
 
+    this.restore()
     this.updateVisibility()
+  }
+
+  private persist() {
+    if (!this.persistEnabled) return
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.entries))
+    } catch {
+      // storage unavailable (private browsing, quota) — history just won't
+      // survive navigation
+    }
+  }
+
+  private restore() {
+    if (!this.persistEnabled) return
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY)
+      if (!stored) return
+      const entries = JSON.parse(stored)
+      if (!Array.isArray(entries) || entries.length === 0) return
+      this.entries = entries
+      this.entries.forEach((entry) => this.renderEntry(entry))
+    } catch {
+      // malformed/unavailable — start with an empty tray
+    }
   }
 
   addShot(isPartOfBreak: boolean, potCount: number, balls: any[], state: any) {
@@ -87,6 +120,7 @@ export class BallTray {
 
     this.entries.push(entry)
     this.renderEntry(entry)
+    this.persist()
     this.updateVisibility()
   }
 
@@ -115,6 +149,7 @@ export class BallTray {
 
     this.entries.push(entry)
     this.renderEntry(entry)
+    this.persist()
     this.updateVisibility()
   }
 
@@ -131,6 +166,7 @@ export class BallTray {
 
     this.entries.push(entry)
     this.renderEntry(entry)
+    this.persist()
     this.updateVisibility()
   }
 
@@ -152,6 +188,13 @@ export class BallTray {
     this.entries = []
     if (this.listElement) {
       this.listElement.innerHTML = ""
+    }
+    if (this.persistEnabled) {
+      try {
+        sessionStorage.removeItem(STORAGE_KEY)
+      } catch {
+        // storage unavailable — nothing to clear
+      }
     }
     this.updateVisibility()
   }
