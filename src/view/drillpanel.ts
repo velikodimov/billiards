@@ -121,9 +121,10 @@ export class DrillPanel {
     this.analyseBtn.addEventListener("click", () => {
       const seed = this.captureSeed()
       if (!seed) return
-      // Open the full-page analysis view in a new tab (same shot, same origin);
-      // the drill tab stays alive so practice state is preserved.
-      window.open(buildModeUrl(seed, "analysis"), "_blank")
+      // Jump to the full-page analysis view in the same tab (same shot, same
+      // origin) — the counterpart of the analysis page's Drill button; the
+      // browser Back button returns to the drill.
+      window.location.href = buildModeUrl(seed, "analysis")
     })
 
     const topPanel = document.createElement("div")
