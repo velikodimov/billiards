@@ -12,6 +12,7 @@ import {
   paramRangeOf,
 } from "../sensitivity"
 import { AnalysisSeed } from "../seedlink"
+import { ExportUtils } from "../utils/export-utils"
 import {
   AnalysisHandle,
   Pick,
@@ -65,6 +66,7 @@ export class AnalysisPanel {
     document.body.classList.add("analysis-mode")
     this.buildPanel()
     this.buildCameraButton()
+    this.buildDiagramButton()
     this.container.view.camera.forceMode(this.container.view.camera.topView)
 
     // Take over the Hit button / canvas-dblclick entirely: a normal "SpaceUp"
@@ -373,6 +375,34 @@ export class AnalysisPanel {
     btn.textContent = "🎥"
     btn.addEventListener("click", () => {
       this.container.view.camera.toggleMode()
+    })
+    document.getElementById("viewP1")?.appendChild(btn)
+  }
+
+  /** Open the current shot (live aim, not the last played one) as a 2-D diagram
+   * in diagrams/export.html — same export the menu's 📸 button uses. */
+  private buildDiagramButton() {
+    const btn = document.createElement("button")
+    btn.id = "analysisDiagram"
+    btn.className = "analysis-diagram-btn"
+    btn.title = "open diagram"
+    btn.setAttribute("aria-label", "Open diagram")
+    btn.textContent = "📸"
+    btn.addEventListener("click", () => {
+      if (this.awaitingRestore) {
+        return
+      }
+      const snapshot = ExportUtils.captureSnapshot(this.container.table)
+      const urlParams = new URLSearchParams(globalThis.location?.search ?? "")
+      const tableSize = parseFloat(urlParams.get("tableSize") || "10")
+      const url = ExportUtils.getExportUrl(
+        false,
+        this.container.rules.rulename,
+        snapshot.init,
+        snapshot.shot,
+        tableSize
+      )
+      window.open(url, "_blank")
     })
     document.getElementById("viewP1")?.appendChild(btn)
   }

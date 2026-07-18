@@ -501,11 +501,12 @@ body.analysis-mode #commentMenu {
   padding: 14px;
 }
 
-/* Floating camera-toggle, lower-right of the table pane (only active control). */
-.analysis-camera-btn {
+/* Floating buttons on the table pane: camera-toggle lower-right,
+   diagram-export upper-right. */
+.analysis-camera-btn,
+.analysis-diagram-btn {
   position: absolute;
   right: 12px;
-  bottom: 12px;
   width: 48px;
   height: 48px;
   border-radius: 8px;
@@ -517,7 +518,16 @@ body.analysis-mode #commentMenu {
   z-index: 5;
 }
 
-.analysis-camera-btn:hover {
+.analysis-camera-btn {
+  bottom: 12px;
+}
+
+.analysis-diagram-btn {
+  top: 12px;
+}
+
+.analysis-camera-btn:hover,
+.analysis-diagram-btn:hover {
   background: rgb(0 60 110 / 85%);
 }
 
