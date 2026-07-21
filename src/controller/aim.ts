@@ -4,6 +4,7 @@ import { ControllerBase } from "./controllerbase"
 import { PlayShot } from "./playshot"
 import { Replay } from "./replay"
 import { gameOverButtons } from "../utils/gameover"
+import { isFirstShot } from "../utils/utils"
 
 /**
  * Aim using input events.
@@ -23,7 +24,12 @@ export class Aim extends ControllerBase {
 
     const params = new URLSearchParams(globalThis.location?.search)
     let customShot = false
-    if (params.has("initShot")) {
+    // initShot describes the shot to load on initial entry (e.g. jumping into
+    // drill/analysis with a specific shot). It must apply only to that first
+    // shot — the URL param persists, so without this guard it would re-apply on
+    // every subsequent Aim, overriding the rules' cue-ball switch and skipping
+    // the aimAtNext auto-aim after each shot.
+    if (params.has("initShot") && isFirstShot(this.container.recorder)) {
       const shot = JSON.parse(params.get("initShot")!)
       if (shot) {
         if (typeof shot.cueBallId === "number") {
