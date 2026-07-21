@@ -90,7 +90,6 @@ const PANEL_HTML = `
       <div class="legend">
         <span class="ok">scores</span>
         <span class="fail">misses</span>
-        <span class="original">original shot</span>
       </div>
       <div class="plot-wrap">
         <canvas data-an="plot" width="420" height="420"></canvas>
@@ -754,7 +753,7 @@ export function runAnalysisInto(
       plotGeom = drawPlot(canvas, spinPoints)
       positionMarkers()
       void requestMarkerColor(liveShot)
-      statusEl.textContent = "Spin scatter shown."
+      statusEl.textContent = ""
     } catch (err) {
       const aborted = signal.aborted || (err as Error)?.message === "aborted"
       statusEl.textContent = aborted
@@ -831,7 +830,7 @@ export function runAnalysisInto(
       for (const key of ONE_D_KEYS) void requestBarMarkerColor(key, liveShot)
       statusEl.textContent = signal.aborted
         ? "Stopped — partial results shown."
-        : "Spin scatter shown — click Show on a bar for its 1-D tolerance."
+        : ""
     } catch (err) {
       const aborted = signal.aborted || (err as Error)?.message === "aborted"
       statusEl.textContent = aborted
