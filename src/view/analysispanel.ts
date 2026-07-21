@@ -419,7 +419,10 @@ export class AnalysisPanel {
     btn.className = "analysis-drill-btn"
     btn.title = "open in drill mode"
     btn.setAttribute("aria-label", "Open in drill mode")
-    btn.textContent = "Drill"
+    const img = document.createElement("img")
+    img.src = "assets/drill.png"
+    img.alt = "Drill"
+    btn.appendChild(img)
     btn.addEventListener("click", () => {
       const shotFired = this.hitInFlight || this.awaitingRestore
       const preShot =

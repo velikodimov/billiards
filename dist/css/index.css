@@ -524,19 +524,44 @@ body.analysis-mode #commentMenu {
 }
 
 .analysis-diagram-btn {
-  top: 12px;
+  /* Sit directly above the camera button (bottom:12px + 48px height + 8px gap). */
+  bottom: 68px;
 }
 
 .analysis-drill-btn {
-  top: 68px;
-  height: 28px;
-  font-size: 13px;
+  top: 40px;
+  /* Slightly larger than the 48px camera buttons. */
+  width: 60px;
+  height: 60px;
+  /* The drill.png icon carries its own background + border, so show it plain. */
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+}
+
+.analysis-drill-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* White background for the two camera buttons, matching the menu buttons in
+   normal threecushion / drill modes. Drill button keeps the dark-blue look. */
+.analysis-camera-btn,
+.analysis-diagram-btn {
+  background: #fff;
+  border-color: rgb(0 0 0 / 20%);
 }
 
 .analysis-camera-btn:hover,
-.analysis-diagram-btn:hover,
+.analysis-diagram-btn:hover {
+  background: #eaeaea;
+}
+
 .analysis-drill-btn:hover {
-  background: rgb(0 60 110 / 85%);
+  filter: brightness(1.15);
 }
 
 /* Stack table / controls / analysis vertically on portrait/narrow screens. */
@@ -570,6 +595,27 @@ body.analysis-mode #commentMenu {
   margin-bottom: 8px;
 }
 
+.analysis-status:empty {
+  display: none;
+}
+
+/* Fixed header/content/heading spacing eats a disproportionate share of a small
+   screen and doesn't shrink on its own — tighten it on a narrow OR short viewport
+   (portrait phones are narrow; landscape phones are short, not narrow). */
+@media (width <= 480px), (height <= 480px) {
+  .analysis-header {
+    padding: 6px 10px;
+  }
+
+  .analysis-content {
+    padding: 8px;
+  }
+
+  #analysisPanel h2 {
+    margin: 10px 0 6px;
+  }
+}
+
 .analysis-results .legend {
   display: flex;
   gap: 14px;
@@ -594,11 +640,6 @@ body.analysis-mode #commentMenu {
 
 .analysis-results .legend .fail::before {
   background: #e0556b;
-}
-
-.analysis-results .legend .original::before {
-  background: transparent;
-  border: 2px solid #fff;
 }
 
 .plot-wrap {
